@@ -1,14 +1,11 @@
 pragma solidity ^0.4.4;
 
-import "./ConvertLib.sol";
-import "./math/SafeMath.sol";
-
 // This is just a simple example of a coin-like contract.
 // It is not standards compatible and cannot be expected to talk to other
 // coin/token contracts. If you want to create a standards-compliant
 // token, see: https://github.com/ConsenSys/Tokens. Cheers!
 
-contract MetaCoin {
+contract RedBlue {
 	enum TeamsEnum { red, blue}
 	struct Bet {
         address addr;
@@ -32,13 +29,12 @@ contract MetaCoin {
         
 
 	uint public betIndex = 0;
- 	uint public nextBlock = 0;
-	mapping(uint => Bet) bets;
+	mapping(uint => Bet) public bets;
 	uint public amountBlue = 0;
 	uint public amountRed = 0 ;
 	uint public bettedBlue = 0;
 	uint public bettedRed = 0;
-	uint lastSolved = 0;
+	uint public lastSolved = 0;
 
 	function MetaCoin() {
 	}
@@ -48,15 +44,15 @@ contract MetaCoin {
 	betIndex = betIndex+1;
 
 	if(add == TeamsEnum.red) {
-        amountRed = SafeMath.add(amountRed,msg.value);
+        amountRed =amountRed+ msg.value;
 	} else {
-	amountBlue = SafeMath.add(amountBlue,msg.value);
+	amountBlue = amountBlue + msg.value;
 	}
 
 	if(bet == TeamsEnum.red) {
-	bettedRed = SafeMath.add(bettedRed,msg.value);
+	bettedRed = bettedRed + msg.value;
 	} else {
-	bettedBlue = SafeMath.add(bettedBlue, msg.value);
+	bettedBlue = bettedBlue + msg.value;
 	}
 	}
 
@@ -67,31 +63,18 @@ uint toTransfer = 0;
  	return;
         }
 	lastSolved = now;
-	 Logging("amountred" , amountRed);
-	Logging("amountblue", amountBlue);
 	if((amountBlue > amountRed && amountRed*3 < amountBlue) || (amountRed > amountBlue && amountBlue * 3 > amountRed)) {
 	for(uint i=0;i<=betIndex;i++) { 
 	if(bets[i].betted == TeamsEnum.red) {
-	Logging("this color red won" , uint(TeamsEnum.red));
-        Logging("betted by this winning bet" , (bets[i].value) );
-         Logging("betted by winning blue total" , bettedBlue );
-        Logging("betted by losing red total:" ,   bettedRed);
-	toTransfer = SafeMath.mul(SafeMath.div(970*bets[i].value,bettedRed) , bettedBlue)/1000 + bets[i].value;
+	toTransfer = (((970*bets[i].value/bettedRed)) *  bettedBlue)/1000 + bets[i].value;
 	bets[i].addr.transfer(toTransfer);
 	Deposit(bets[i].addr,toTransfer);
  	}
 }
 } else {
 	for(uint j=0;j<=betIndex;j++) {
-Logging("betted", uint(bets[i].betted));
-        Logging("winner", uint(TeamsEnum.red));
-Logging("betted.VALUE:", uint(bets[i].value));
 	if(bets[j].betted == TeamsEnum.blue) {
-	Logging("this color blue won", uint(TeamsEnum.blue));
-	Logging("betted by this winning bet" , (bets[j].value) );
-	 Logging("betted by winning blue total" , bettedBlue );
-	Logging("betted by losing red total:" ,   bettedRed);
-	toTransfer = SafeMath.mul(SafeMath.div(bets[j].value*970,bettedBlue) , bettedRed)/1000 + bets[j].value;
+	toTransfer = (((bets[j].value*970)/bettedBlue) *  bettedRed)/1000 + bets[j].value;
 	bets[j].addr.transfer(toTransfer);
 Deposit(bets[j].addr, toTransfer);
  	}
